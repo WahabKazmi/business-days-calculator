@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Days Calculator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script>
+        function getBusinessDays(startDate, days) {
+            const result = [];
+            let currentDate = new Date(startDate);
+
+            while (result.length < days) {
+                // Check if the current date is a weekday (Monday to Friday)
+                if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6) {
+                    result.push(new Date(currentDate)); // Add the date to the result
+                }
+                currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+            }
+
+            return {
+                startDate: result[0], // The first business day
+                endDate: result[result.length - 1], // The last business day
+            };
+        }
+
+        let lastEndDate = null;
+
+        function calculateBusinessDays() {
+            const startDateInput = document.getElementById("startDate").value;
+            const daysInput = parseInt(document.getElementById("days").value, 10);
+            
+            if (!startDateInput || isNaN(daysInput) || daysInput <= 0) {
+                alert("Please enter a valid start date and a positive number of days.");
+                return;
+            }
+
+            const { startDate, endDate } = getBusinessDays(new Date(startDateInput), daysInput);
+            lastEndDate = endDate; // Save the last end date
+
+            document.getElementById("result").innerHTML = `
+                <p class="text-lg font-semibold">Start Date: ${startDate.toDateString()}</p>
+                <p class="text-lg font-semibold">End Date: ${endDate.toDateString()}</p>
+            `;
+            document.getElementById("addEndDate").classList.remove("hidden"); // Show the button
+        }
+
+        function addEndDateAsStart() {
+            if (lastEndDate) {
+                document.getElementById("startDate").value = lastEndDate.toISOString().split('T')[0]; // Set end date as new start date
+                document.getElementById("days").value = ''; // Clear the days input
+                document.getElementById("result").innerHTML = ''; // Clear the result
+                document.getElementById("addEndDate").classList.add("hidden"); // Hide the button
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-80">
+        <h1 class="text-2xl font-bold mb-4 text-center">Business Days Calculator</h1>
+        <label class="block mb-2">
+            <span class="text-gray-700">Start Date:</span>
+            <input type="date" id="startDate" class="mt-1 block w-full p-2 border rounded-md" required>
+        </label>
+        <label class="block mb-4">
+            <span class="text-gray-700">Number of Business Days:</span>
+            <input type="number" id="days" class="mt-1 block w-full p-2 border rounded-md" required>
+        </label>
+        <button onclick="calculateBusinessDays()" class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600">Calculate</button>
+        <div id="result" class="mt-4 text-center"></div>
+        <button id="addEndDate" onclick="addEndDateAsStart()" class="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 mt-4 hidden">Add End Date as Start Date</button>
+    </div>
+</body>
+</html>
